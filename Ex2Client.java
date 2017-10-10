@@ -25,42 +25,38 @@ public final class Ex2Client
     		
     		
     		dis.readFully(byteArrayIn);
-//    		
+    		
     		int n = 0;
     		byte tempByte;
     		
-//    		is.read(byteArrayIn);
+    		
     		for(int i = 0; i <= byteArrayOut.length - 1; n++)
     		{
-    			
     			tempByte = twoBytesToShort(byteArrayIn[n], byteArrayIn[n+1]);
     			byteArrayOut[i] = tempByte;
-    			
-    			System.out.println("Hex-form: " + (bytesToHex(byteArrayOut)));
     			i++;
-    			
     		}
     		
+    		System.out.println("Hex-form: " + (bytesToHex(byteArrayOut)));
+			
+    		
     		// use java crc32
-    		crc32Sum(is);
     		CRC32 crc32 = new CRC32();
     		crc32.update(byteArrayOut);
     		System.out.printf("%X\n", crc32.getValue());
     		long bytee = crc32.getValue();
     		
-    		
+    		byte [] bytes = ByteBuffer.allocate(8).putLong(bytee).array();
+     	    System.out.println(Arrays.toString(bytes));
+     	    byte [] bob = Arrays.copyOfRange(bytes, 4, 8);
+     	    System.out.println(Arrays.toString(bob));
+     	    
     		
     		// send crc as sequence back to server
     		OutputStream out = socket.getOutputStream(); 
     	    DataOutputStream dos = new DataOutputStream(out);
     	    
-
-    	    byte [] bytes = ByteBuffer.allocate(8).putLong(bytee).array();
-    	    System.out.println(Arrays.toString(bytes));
-    	    byte [] bob = Arrays.copyOfRange(bytes, 4, 8);
-    	    System.out.println(Arrays.toString(bob));
-    	    
-    	    dos.write(bob);
+    	    dos.write(bytes, 4, 4);
     	    
     		
     		
@@ -75,25 +71,7 @@ public final class Ex2Client
     	}
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	protected static long crc32Sum(InputStream is) throws Exception {
-		CRC32 crc = new CRC32();
-		byte[] ba = new byte[(int) is.available()];
-		String crcString = crc.toString();
-		
-		is.read(ba);
-		crc.update(ba);
-		is.close();
-		System.out.println("Generated CRC32: " + crcString.substring(crcString.lastIndexOf("@") + 1));
-		
-		return crc.getValue();
-	}
+
 	
 	
 	
@@ -102,7 +80,6 @@ public final class Ex2Client
 	public static byte twoBytesToShort(byte b1, byte b2) 
 	{
 		return (byte) ((b1 << 4) | (b2));
-//		return (byte) ((b1 & 0xff00 << 8) | (b2 & 0xFF));
 	}
 	
 	
