@@ -19,12 +19,14 @@ public final class Ex2Client
     		// Read from INPUTSTREAM twice then concat bytes.
     		InputStream is = socket.getInputStream();
     		DataInputStream dis = new DataInputStream(is);
-    		byte[] byteArrayIn = new byte[200];
+    		byte[] byteArrayIn1 = new byte[100];
+    		byte[] byteArrayIn2 = new byte[100];
     		byte[] byteArrayOut = new byte[100];
     		byte[] byteArrayReturn = new byte[1];
+    		byteArrayReturn[0] = 1;
     		
-    		
-    		dis.readFully(byteArrayIn);
+    		dis.readFully(byteArrayIn1);
+    		dis.readFully(byteArrayIn2);
     		
     		int n = 0;
     		byte tempByte;
@@ -32,7 +34,7 @@ public final class Ex2Client
     		
     		for(int i = 0; i <= byteArrayOut.length - 1; n++)
     		{
-    			tempByte = twoBytesToShort(byteArrayIn[n], byteArrayIn[n+1]);
+    			tempByte = twoBytesToShort(byteArrayIn1[n], byteArrayIn2[n]);
     			byteArrayOut[i] = tempByte;
     			i++;
     		}
@@ -48,22 +50,26 @@ public final class Ex2Client
     		
     		byte [] bytes = ByteBuffer.allocate(8).putLong(bytee).array();
      	    System.out.println(Arrays.toString(bytes));
-     	    byte [] bob = Arrays.copyOfRange(bytes, 4, 8);
-     	    System.out.println(Arrays.toString(bob));
-     	    
     		
+     	    
+     	    
     		// send crc as sequence back to server
     		OutputStream out = socket.getOutputStream(); 
     	    DataOutputStream dos = new DataOutputStream(out);
     	    
     	    dos.write(bytes, 4, 4);
     	    
-    		
+
     		
     		// if server gets same crc then sends byte = 1 else 0
     		dis.readFully(byteArrayReturn);
     		
-    		System.out.println("~~~~" + (bytesToHex(byteArrayReturn))); 
+    		String correct = (bytesToHex(byteArrayReturn)).substring(1);
+    		
+    		if(correct == "1")
+    			System.out.println("Response Good."); 
+    		else
+    			System.out.println("Response Bad."); 
         }
     	catch(IOException e)
     	{
