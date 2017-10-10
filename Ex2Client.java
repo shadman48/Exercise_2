@@ -1,6 +1,11 @@
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.zip.CRC32;
 
 public final class Ex2Client 
@@ -9,52 +14,73 @@ public final class Ex2Client
 	public static void main(String[] args) throws Exception 
 	{
 		// Create socket
-    	try (Socket socket = new Socket("18.221.102.182", 38002)) 
+    	try (Socket socket = new Socket("18.221.102.182", 38102)) 
         {
     		// Read from INPUTSTREAM twice then concat bytes.
     		InputStream is = socket.getInputStream();
-//    		byte[] byteArrayIn = new byte[200];
-//    		byte[] byteArrayOut = new byte[100];
-    		byte[] byteArrayIn = new byte[2];
-    		byte[] byteArrayOut = new byte[1];
+    		DataInputStream dis = new DataInputStream(is);
+    		byte[] byteArrayIn = new byte[200];
+    		byte[] byteArrayOut = new byte[100];
+    		byte[] byteArrayReturn = new byte[1];
     		
     		
-//    		is.read(byteArrayIn);
-    		
-    		byteArrayIn[0] = 0x05;
-    		byteArrayIn[1] = 0x0A;
-    		
-    		
+    		dis.readFully(byteArrayIn);
+//    		
     		int n = 0;
     		byte tempByte;
+    		
+//    		is.read(byteArrayIn);
     		for(int i = 0; i <= byteArrayOut.length - 1; n++)
     		{
     			
-    			
     			tempByte = twoBytesToShort(byteArrayIn[n], byteArrayIn[n+1]);
-    			byteArrayOut[n] = tempByte;
-    			
-    			//System.out.println(byteArrayOut.toString() + " " + byteArrayOut);
+    			byteArrayOut[i] = tempByte;
     			
     			System.out.println("Hex-form: " + (bytesToHex(byteArrayOut)));
-    			n++;
     			i++;
     			
     		}
     		
     		// use java crc32
     		crc32Sum(is);
+    		CRC32 crc32 = new CRC32();
+    		crc32.update(byteArrayOut);
+    		System.out.printf("%X\n", crc32.getValue());
+    		long bytee = crc32.getValue();
+    		
+    		
     		
     		// send crc as sequence back to server
-    		// if server gets crc then sends byte = 1 else 0
+    		OutputStream out = socket.getOutputStream(); 
+    	    DataOutputStream dos = new DataOutputStream(out);
+    	    
+
+    	    byte [] bytes = ByteBuffer.allocate(8).putLong(bytee).array();
+    	    System.out.println(Arrays.toString(bytes));
+    	    byte [] bob = Arrays.copyOfRange(bytes, 4, 8);
+    	    System.out.println(Arrays.toString(bob));
+    	    
+    	    dos.write(bob);
+    	    
     		
     		
+    		// if server gets same crc then sends byte = 1 else 0
+    		dis.readFully(byteArrayReturn);
+    		
+    		System.out.println("~~~~" + (bytesToHex(byteArrayReturn))); 
         }
     	catch(IOException e)
     	{
     		return;
     	}
 	}
+	
+	
+	
+	
+	
+	
+	
 	
 	protected static long crc32Sum(InputStream is) throws Exception {
 		CRC32 crc = new CRC32();
@@ -70,11 +96,18 @@ public final class Ex2Client
 	}
 	
 	
+	
+	
+	
 	public static byte twoBytesToShort(byte b1, byte b2) 
 	{
 		return (byte) ((b1 << 4) | (b2));
 //		return (byte) ((b1 & 0xff00 << 8) | (b2 & 0xFF));
 	}
+	
+	
+	
+
 	
 	
 	
@@ -89,6 +122,11 @@ public final class Ex2Client
 	    }
 	    return new String(hexChars);
 	}
+	
+	
+	
+	
+	
 	
 
 }
