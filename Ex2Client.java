@@ -3,6 +3,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -31,6 +32,12 @@ public final class Ex2Client
     		int n = 0;
     		byte tempByte;
     		
+    		//byte[] test = Files.readAllBytes(new File("/fileToRead.txt").toPath());
+//    		Path fileLocation = Paths.get("fileToRead.txt");
+//    		byte[] test = Files.readAllBytes(fileLocation);
+    		String s="51E0908A32F6867BD5DF384AC3A040D75D699CCB9B137545AEA15BA078C7C0FAF205BA90E5A4C7C95DC2358DD7DC89CBBBA408933D13C39B3945716F153C1840E77C184D0A60661BBF20FC4C9F0BFB043C0990437604AE6BC60102483A127DBC7220BD84";
+    		 
+    		byte[] test = new BigInteger(s,16).toByteArray();
     		
     		for(int i = 0; i <= byteArrayOut.length - 1; n++)
     		{
@@ -39,12 +46,12 @@ public final class Ex2Client
     			i++;
     		}
     		
-    		System.out.println("Hex-form: " + (bytesToHex(byteArrayOut)));
+    		System.out.println("Hex-form: " + (bytesToHex(test)));
 			
     		
     		// use java crc32
     		CRC32 crc32 = new CRC32();
-    		crc32.update(byteArrayOut);
+    		crc32.update(test);
     		System.out.printf("%X\n", crc32.getValue());
     		long bytee = crc32.getValue();
     		
